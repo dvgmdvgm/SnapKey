@@ -5,8 +5,11 @@
 #include <string>
 #include <unordered_map>
 #include <regex>
+#include <thread>
+#include <chrono>
 
 using namespace std;
+using namespace chrono_literals;
 
 #define ID_TRAY_APP_ICON                1001
 #define ID_TRAY_EXIT_CONTEXT_MENU_ITEM  3000
@@ -183,13 +186,14 @@ bool isSimulatedKeyEvent(DWORD flags) {
 
 void SendKey(int targetKey, bool keyDown)
 {
-    INPUT input = {0};
+    static INPUT input = {0};
     input.ki.wVk = targetKey;
     input.ki.wScan = MapVirtualKey(targetKey, 0);
     input.type = INPUT_KEYBOARD;
 
     DWORD flags = KEYEVENTF_SCANCODE;
     input.ki.dwFlags = keyDown ? flags : flags | KEYEVENTF_KEYUP;
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     SendInput(1, &input, sizeof(INPUT));
 }
 
